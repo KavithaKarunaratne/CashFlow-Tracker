@@ -19,9 +19,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')),  # Change 'core' if your app name is different
 ]
+
+
 
 
