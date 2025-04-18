@@ -27,3 +27,12 @@ def balance_summary(request):
         'total_expense': expense_total,
         'balance': balance
     })
+@api_view(['GET'])
+def income_total(request):
+    income = Transaction.objects.filter(type='income').aggregate(Sum('amount'))['amount__sum'] or 0
+    return Response({'total_income': income})
+
+@api_view(['GET'])
+def expense_total(request):
+    expense = Transaction.objects.filter(type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
+    return Response({'total_expense': expense})
