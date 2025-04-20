@@ -1,4 +1,3 @@
-// src/components/Modal.jsx
 import { FaTimes } from "react-icons/fa";
 
 export default function Modal({ isOpen, onClose, title, children, position = "center" }) {
@@ -16,7 +15,7 @@ export default function Modal({ isOpen, onClose, title, children, position = "ce
       : "w-full max-w-md rounded-lg";
 
   return (
-    <div className={`fixed inset-0 z-40 flex ${modalPosition} bg-black bg-opacity-40`}>
+    <div className={`fixed inset-0 z-40 flex ${modalPosition} bg-black bg-opacity-70`}>
       <div className={`bg-white shadow-lg mx-4 p-6 relative ${modalBoxStyle}`}>
         <button
           className="absolute top-3 right-3 text-gray-400 hover:text-red-500"
@@ -30,4 +29,4 @@ export default function Modal({ isOpen, onClose, title, children, position = "ce
       </div>
     </div>
   );
-}   
+}

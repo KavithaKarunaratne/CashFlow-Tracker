@@ -5,11 +5,11 @@ import { FaHome, FaPlusCircle, FaListAlt, FaTags, FaBars } from "react-icons/fa"
 const navItems = [
   { name: "Home", path: "/", icon: <FaHome /> },
   { name: "Add Transaction", path: "/add", icon: <FaPlusCircle /> },
-  { name: "View Expenses", path: "/expenses", icon: <FaListAlt /> },
-  { name: "Manage Tags", path: "/tags", icon: <FaTags /> },
+  { name: "View Transactions", path: "/expenses", icon: <FaListAlt /> },
+  // Remove Manage Tags from here!
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onManageTagsClick }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -53,6 +53,19 @@ export default function Sidebar() {
               {item.name}
             </NavLink>
           ))}
+
+          {/* Add Manage Tags as a button */}
+          <button
+            className="flex items-center gap-3 px-4 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-blue-50 transition-colors mt-2"
+            onClick={() => {
+              setOpen(false); // close sidebar on mobile
+              if (onManageTagsClick) onManageTagsClick();
+            }}
+            type="button"
+          >
+            <span className="text-lg"><FaTags /></span>
+            Manage Tags
+          </button>
         </nav>
       </aside>
 
