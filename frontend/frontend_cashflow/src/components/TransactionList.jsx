@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TransactionCard from './Transactioncard';
 import TagChip from './TagChip';
 
-const TransactionList = ({ transactions, onTransactionDeleted }) => {
+const TransactionList = ({ transactions, onTransactionDeleted, onEdit }) => {
   const [expandedId, setExpandedId] = useState(null);
 
   const handleExpand = (id) => {
@@ -37,7 +37,7 @@ const TransactionList = ({ transactions, onTransactionDeleted }) => {
             isIncome={txn.amount > 0}
             expanded={expandedId === txn.id}
             tags={txn.tags}
-            onEdit={e => { e.stopPropagation(); /* handleEdit(txn) */ }}
+            onEdit={() => { if (typeof onEdit === 'function') onEdit(txn); }}
             onDelete={e => { e.stopPropagation(); handleDelete(txn); }}
             // Make the whole card clickable except for action buttons
             onClick={() => handleExpand(txn.id)}

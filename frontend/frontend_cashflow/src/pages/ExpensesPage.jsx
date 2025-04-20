@@ -4,6 +4,7 @@ import TransactionFilters from '../components/TransactionFilters';
 import TransactionList from '../components/TransactionList';
 import Pagination from '../components/Pagination';
 import NotificationComponent from '../components/Notification';
+import EditTransactionModal from '../components/EditTransactionModal';
 
 const PAGE_SIZE = 5;
 
@@ -34,6 +35,7 @@ const ExpensesPage = () => {
   const [tags, setTags] = useState([]);
   const [loadingTags, setLoadingTags] = useState(true);
   const [notification, setNotification] = useState(null);
+  const [editingTransaction, setEditingTransaction] = useState(null);
 
   // Fetch transactions from backend
   const fetchTransactions = async () => {
@@ -123,8 +125,35 @@ const ExpensesPage = () => {
             setNotification({ type: 'error', message: error });
           }
         }}
+        onEdit={txn => { console.log('Editing transaction:', txn); setEditingTransaction(txn); }}
       />
       <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+      {editingTransaction && (
+        <EditTransactionModal
+          transaction={editingTransaction}
+          tags={tags}
+          onClose={() => setEditingTransaction(null)}
+          onSave={async (updatedTxn) => {
+            const response = await fetch(`/api/transactions/${updatedTxn.id}/`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: updatedTxn.type,
+                description: updatedTxn.description,
+                amount: updatedTxn.amount,
+                tag_ids: updatedTxn.tag_ids,
+              }),
+            });
+            if (response.ok) {
+              setTransactions(prev => prev.map(txn => txn.id === updatedTxn.id ? { ...txn, ...updatedTxn } : txn));
+              setNotification({ type: 'success', message: 'Transaction updated!' });
+              setEditingTransaction(null);
+            } else {
+              setNotification({ type: 'error', message: 'Failed to update transaction.' });
+            }
+          }}
+        />
+      )}
       {notification && (
         <NotificationComponent
           type={notification.type}
