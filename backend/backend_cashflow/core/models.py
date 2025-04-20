@@ -19,7 +19,7 @@ class Transaction(models.Model):
     description = models.TextField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(auto_now_add=True)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='transactions')
+    tags = models.ManyToManyField(Tag, related_name='transactions')
 
     def __str__(self):
         return f"{self.type} - {self.amount}"
