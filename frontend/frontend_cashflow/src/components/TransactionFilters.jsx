@@ -1,8 +1,5 @@
-// src/components/TransactionFilters.jsx
-
 import React from 'react';
-
-const tags = ['Food', 'Transport', 'Entertainment', 'Bills', 'Shopping', 'Health', 'Travel', 'Salary'];
+import TagChip from './TagChip';
 
 const TransactionFilters = ({
   search,
@@ -12,7 +9,9 @@ const TransactionFilters = ({
   type,
   setType,
   amountOrder,
-  setAmountOrder
+  setAmountOrder,
+  tags = [],
+  loadingTags = false,
 }) => (
   <div className="mb-4 space-y-2">
     <input
@@ -34,23 +33,24 @@ const TransactionFilters = ({
         <option value="desc">Greater</option>
       </select>
       <span className="ml-2 font-semibold">Filter by tags:</span>
-      {tags.map(tag => (
-        <button
-          key={tag}
-          onClick={() =>
-            setSelectedTags(selectedTags.includes(tag)
-              ? selectedTags.filter(t => t !== tag)
-              : [...selectedTags, tag])
-          }
-          className={`px-2 py-1 rounded-full border text-xs ${
-            selectedTags.includes(tag)
-              ? 'bg-blue-100 border-blue-400 text-blue-700'
-              : 'bg-gray-100 border-gray-300 text-gray-500'
-          }`}
-        >
-          {tag}
-        </button>
-      ))}
+      {loadingTags ? (
+        <span>Loading tags...</span>
+      ) : (
+        tags.map(tag => (
+            <TagChip
+              key={tag.id}
+              label={tag.name}
+              color={tag.color}
+              selected={selectedTags.includes(tag.id)}
+              onClick={() =>
+                setSelectedTags(selectedTags.includes(tag.id)
+                  ? selectedTags.filter(t => t !== tag.id)
+                  : [...selectedTags, tag.id])
+              }
+              className="cursor-pointer"
+            />
+          ))
+      )}
     </div>
   </div>
 );

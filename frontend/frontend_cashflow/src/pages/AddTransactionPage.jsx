@@ -49,7 +49,7 @@ export default function AddTransactionPage() {
           type,
           description,
           amount: parseFloat(amount),
-          tags: selectedTags,
+          tag_ids: selectedTags,
         }),
       });
       if (!response.ok) {

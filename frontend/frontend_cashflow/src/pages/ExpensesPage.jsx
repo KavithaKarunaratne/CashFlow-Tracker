@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import TransactionFilters from '../components/TransactionFilters';
 import TransactionList from '../components/TransactionList';
 import Pagination from '../components/Pagination';
+import NotificationComponent from '../components/Notification';
 
 const PAGE_SIZE = 5;
 
@@ -10,7 +11,9 @@ const filterTransactions = (transactions, { search, selectedTags, type, amountOr
   let filtered = transactions;
   if (search) filtered = filtered.filter(txn => txn.description.toLowerCase().includes(search.toLowerCase()));
   if (selectedTags.length)
-    filtered = filtered.filter(txn => selectedTags.some(tag => txn.tags?.includes(tag)));
+    filtered = filtered.filter(txn =>
+      txn.tags && txn.tags.some(tagObj => selectedTags.includes(tagObj.id))
+    );
   if (type) filtered = filtered.filter(txn => (type === 'income' ? txn.amount > 0 : txn.amount < 0));
   if (amountOrder)
     filtered = filtered.sort((a, b) => amountOrder === 'asc' ? a.amount - b.amount : b.amount - a.amount);
@@ -27,6 +30,11 @@ const ExpensesPage = () => {
   const [amountOrder, setAmountOrder] = useState('');
   const [page, setPage] = useState(1);
 
+  // NEW: Tags state
+  const [tags, setTags] = useState([]);
+  const [loadingTags, setLoadingTags] = useState(true);
+  const [notification, setNotification] = useState(null);
+
   // Fetch transactions from backend
   const fetchTransactions = async () => {
     try {
@@ -38,28 +46,56 @@ const ExpensesPage = () => {
     }
   };
 
-  // Fetch on mount
+  // Fetch tags from backend
+  const fetchTags = async () => {
+    setLoadingTags(true);
+    try {
+      const response = await fetch('/api/tags/');
+      const data = await response.json();
+      setTags(data);
+    } catch (error) {
+      // handle error (show notification, etc.)
+    } finally {
+      setLoadingTags(false);
+    }
+  };
+
   useEffect(() => {
     fetchTransactions();
+    fetchTags();
   }, []);
 
-  // Refetch if navigated with refresh flag
   useEffect(() => {
     if (location.state?.refresh) {
       fetchTransactions();
-      window.history.replaceState({}, document.title); // Clear refresh flag
+      window.history.replaceState({}, document.title);
     }
-    // eslint-disable-next-line
   }, [location.state]);
 
-  // Filtered and paginated transactions
   const filtered = filterTransactions(transactions, { search, selectedTags, type, amountOrder });
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   useEffect(() => {
-    setPage(1); // Reset to page 1 when filters change
+    setPage(1);
   }, [search, selectedTags, type, amountOrder]);
+
+  // Delete transaction handler
+  const handleDeleteTransaction = async (id) => {
+    try {
+      const response = await fetch(`/api/transactions/${id}/`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setTransactions((prev) => prev.filter((txn) => txn.id !== id));
+        setNotification({ type: 'success', message: 'Transaction deleted successfully!' });
+      } else {
+        setNotification({ type: 'error', message: 'Failed to delete transaction.' });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'Error deleting transaction.' });
+    }
+  };
 
   return (
     <div className="p-6">
@@ -73,9 +109,29 @@ const ExpensesPage = () => {
         setType={setType}
         amountOrder={amountOrder}
         setAmountOrder={setAmountOrder}
+        tags={tags}
+        loadingTags={loadingTags}
       />
-      <TransactionList transactions={paginated} />
+      <TransactionList 
+        transactions={paginated} 
+        onTransactionDeleted={(id, error) => {
+          // Remove from the full transactions state, not just paginated
+          setTransactions(prev => prev.filter(txn => txn.id !== id));
+          if (!error) {
+            setNotification({ type: 'success', message: 'Transaction deleted successfully!' });
+          } else {
+            setNotification({ type: 'error', message: error });
+          }
+        }}
+      />
       <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+      {notification && (
+        <NotificationComponent
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 };

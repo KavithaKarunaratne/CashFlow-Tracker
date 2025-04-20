@@ -1,23 +1,33 @@
-// src/components/TagChip.jsx
-import { FaTimes } from "react-icons/fa";
-
 export default function TagChip({
   label,
-  color = "bg-blue-100 text-blue-700",
+  color = "#60A5FA", // default blue
+  selected = false,
   onClick,
   onRemove,
-  selected = false,
   className = "",
   ...props
 }) {
+  // If using Tailwind classes from DB, color might be "border-red-400"
+  // If using hex, color might be "#F87171"
+  const outlineStyle = typeof color === "string" && color.startsWith("#")
+    ? { borderColor: color, color: color }
+    : {};
+
+  const filledStyle = selected
+    ? typeof color === "string" && color.startsWith("#")
+      ? { backgroundColor: color, color: "#fff", borderColor: color }
+      : {}
+    : {};
+
   return (
     <span
       className={`
         inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-        cursor-pointer transition
-        ${selected ? "ring-2 ring-blue-400" : ""}
-        ${color} ${className}
+        cursor-pointer transition border
+        ${selected ? "" : ""}
+        ${className}
       `}
+      style={selected ? filledStyle : outlineStyle}
       onClick={onClick}
       {...props}
     >
@@ -32,7 +42,7 @@ export default function TagChip({
           }}
           aria-label={`Remove ${label}`}
         >
-          <FaTimes />
+          ×
         </button>
       )}
     </span>
