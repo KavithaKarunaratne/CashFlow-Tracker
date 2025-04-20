@@ -9,7 +9,8 @@ export default function DashBoardPage() {
   const [income, setIncome] = useState(0);
   const [expenses, setExpenses] = useState(0);
   const [balance, setBalance] = useState(0);
-  const [currency, setCurrency] = useState("CAD");
+  const [currency, setCurrency] = useState("USD");
+  const [activeCard, setActiveCard] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,8 +60,21 @@ export default function DashBoardPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <button className="btn btn-primary flex-1" onClick={() => navigate("/add")}>Add Transaction</button>
-        <button className="btn flex-1 border" onClick={() => navigate("/expenses")}>View Transactions</button>
+        {[{label: 'Add Transaction', route: '/add'}, {label: 'View Transactions', route: '/expenses'}].map((card, idx) => (
+          <button
+            key={card.label}
+            className={`flex-1 rounded-lg shadow p-4 text-base font-semibold transition-all duration-150 focus:outline-none 
+              ${activeCard === idx ? 'bg-blue-600 text-white' : 'bg-white text-blue-700 hover:bg-blue-100'}
+            `}
+            style={{ minHeight: '72px' }}
+            onClick={() => {
+              setActiveCard(idx);
+              setTimeout(() => navigate(card.route), 120); // short delay for visual feedback
+            }}
+          >
+            {card.label}
+          </button>
+        ))}
       </div>
 
       <div className="bg-white rounded-lg p-4 shadow">

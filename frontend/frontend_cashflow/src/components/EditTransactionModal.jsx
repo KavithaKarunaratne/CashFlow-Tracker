@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
+import TagChip from './TagChip';
 
 export default function EditTransactionModal({ transaction, tags, onClose, onSave }) {
   React.useEffect(() => {
@@ -40,6 +41,7 @@ export default function EditTransactionModal({ transaction, tags, onClose, onSav
     // Compose payload
     const updatedTxn = {
       ...transaction,
+      type: form.type,
       description: form.description,
       amount: form.type === 'income' ? +form.amount : -Math.abs(form.amount),
       tag_ids: form.tagIds,
@@ -99,14 +101,14 @@ export default function EditTransactionModal({ transaction, tags, onClose, onSav
           <label className="block mb-1">Tags (Select at least one)</label>
           <div className="flex flex-wrap gap-2">
             {tags.map(tag => (
-              <button
-                type="button"
+              <TagChip
                 key={tag.id}
-                className={`px-2 py-1 rounded-full border ${form.tagIds.includes(tag.id) ? 'bg-blue-200' : 'bg-gray-100'}`}
+                label={tag.name}
+                color={tag.color}
+                selected={form.tagIds.includes(tag.id)}
                 onClick={() => handleTagToggle(tag.id)}
-              >
-                {tag.name}
-              </button>
+                className="cursor-pointer"
+              />
             ))}
           </div>
         </div>

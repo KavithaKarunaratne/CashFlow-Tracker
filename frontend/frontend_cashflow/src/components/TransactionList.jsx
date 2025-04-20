@@ -34,7 +34,7 @@ const TransactionList = ({ transactions, onTransactionDeleted, onEdit }) => {
             description={txn.description}
             date={txn.date}
             amount={txn.amount}
-            isIncome={txn.amount > 0}
+            isIncome={txn.type ? txn.type === 'income' : txn.amount > 0}
             expanded={expandedId === txn.id}
             tags={txn.tags}
             onEdit={() => { if (typeof onEdit === 'function') onEdit(txn); }}

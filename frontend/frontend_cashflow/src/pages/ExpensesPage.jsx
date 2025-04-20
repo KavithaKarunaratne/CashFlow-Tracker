@@ -6,9 +6,9 @@ import Pagination from '../components/Pagination';
 import NotificationComponent from '../components/Notification';
 import EditTransactionModal from '../components/EditTransactionModal';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 4;
 
-const filterTransactions = (transactions, { search, selectedTags, type, amountOrder }) => {
+const filterTransactions = (transactions, { search, selectedTags, type, amountOrder, amountValue }) => {
   let filtered = transactions;
   if (search) filtered = filtered.filter(txn => txn.description.toLowerCase().includes(search.toLowerCase()));
   if (selectedTags.length)
@@ -16,8 +16,13 @@ const filterTransactions = (transactions, { search, selectedTags, type, amountOr
       txn.tags && txn.tags.some(tagObj => selectedTags.includes(tagObj.id))
     );
   if (type) filtered = filtered.filter(txn => (type === 'income' ? txn.amount > 0 : txn.amount < 0));
-  if (amountOrder)
-    filtered = filtered.sort((a, b) => amountOrder === 'asc' ? a.amount - b.amount : b.amount - a.amount);
+  if (amountOrder && amountValue !== '') {
+    const num = Number(amountValue);
+    if (!isNaN(num)) {
+      if (amountOrder === 'asc') filtered = filtered.filter(txn => Math.abs(txn.amount) < num);
+      else if (amountOrder === 'desc') filtered = filtered.filter(txn => Math.abs(txn.amount) > num);
+    }
+  }
   return filtered;
 };
 
@@ -28,8 +33,9 @@ const ExpensesPage = () => {
   const [search, setSearch] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [type, setType] = useState('');
-  const [amountOrder, setAmountOrder] = useState('');
+  const [amountOrder, setAmountOrder] = useState('desc');
   const [page, setPage] = useState(1);
+  const [amountValue, setAmountValue] = useState('');
 
   // NEW: Tags state
   const [tags, setTags] = useState([]);
@@ -74,13 +80,13 @@ const ExpensesPage = () => {
     }
   }, [location.state]);
 
-  const filtered = filterTransactions(transactions, { search, selectedTags, type, amountOrder });
+  const filtered = filterTransactions(transactions, { search, selectedTags, type, amountOrder, amountValue });
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   useEffect(() => {
     setPage(1);
-  }, [search, selectedTags, type, amountOrder]);
+  }, [search, selectedTags, type, amountOrder, amountValue]);
 
   // Delete transaction handler
   const handleDeleteTransaction = async (id) => {
@@ -100,9 +106,10 @@ const ExpensesPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">Your Transactions</h2>
-      <TransactionFilters
+    <div className="flex justify-center min-h-screen bg-gray-50">
+      <div className="w-full max-w-2xl p-6">
+        <h2 className="text-2xl font-semibold mb-4 text-center">Your Transactions</h2>
+        <TransactionFilters
         search={search}
         setSearch={setSearch}
         selectedTags={selectedTags}
@@ -111,9 +118,12 @@ const ExpensesPage = () => {
         setType={setType}
         amountOrder={amountOrder}
         setAmountOrder={setAmountOrder}
+        amountValue={amountValue}
+        setAmountValue={setAmountValue}
         tags={tags}
         loadingTags={loadingTags}
       />
+      <hr className="my-4 border-gray-200" />
       <TransactionList 
         transactions={paginated} 
         onTransactionDeleted={(id, error) => {
@@ -127,7 +137,9 @@ const ExpensesPage = () => {
         }}
         onEdit={txn => { console.log('Editing transaction:', txn); setEditingTransaction(txn); }}
       />
-      <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+      {totalPages > 1 && (
+        <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+      )}
       {editingTransaction && (
         <EditTransactionModal
           transaction={editingTransaction}
@@ -161,6 +173,7 @@ const ExpensesPage = () => {
           onClose={() => setNotification(null)}
         />
       )}
+      </div>
     </div>
   );
 };

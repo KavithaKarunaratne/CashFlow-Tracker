@@ -25,7 +25,7 @@ const TransactionCard = ({
         <div className="font-medium">{title}</div>
         {/* Description below the title, styled subtly */}
         {description && (
-          <div className="text-gray-400 text-sm">{description}</div>
+          <div className="text-black text-base font-semibold">{description}</div>
         )}
         <div className="text-gray-400 text-xs">{date}</div>
       </div>
