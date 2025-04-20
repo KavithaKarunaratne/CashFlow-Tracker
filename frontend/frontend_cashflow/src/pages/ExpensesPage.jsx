@@ -15,7 +15,7 @@ const filterTransactions = (transactions, { search, selectedTags, type, amountOr
     filtered = filtered.filter(txn =>
       txn.tags && txn.tags.some(tagObj => selectedTags.includes(tagObj.id))
     );
-  if (type) filtered = filtered.filter(txn => (type === 'income' ? txn.amount > 0 : txn.amount < 0));
+  if (type) filtered = filtered.filter(txn => txn.type === type);
   if (amountOrder && amountValue !== '') {
     const num = Number(amountValue);
     if (!isNaN(num)) {
@@ -80,7 +80,13 @@ const ExpensesPage = () => {
     }
   }, [location.state]);
 
-  const filtered = filterTransactions(transactions, { search, selectedTags, type, amountOrder, amountValue });
+  // Sort transactions by date descending (latest first)
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    const dateDiff = new Date(b.date) - new Date(a.date);
+    if (dateDiff !== 0) return dateDiff;
+    return b.id - a.id; // Newer IDs first if dates are equal
+  });
+  const filtered = filterTransactions(sortedTransactions, { search, selectedTags, type, amountOrder, amountValue });
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 

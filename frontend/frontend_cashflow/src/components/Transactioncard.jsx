@@ -48,9 +48,19 @@ const TransactionCard = ({
           ))}
         </div>
         {/* Actions */}
-        <div className="flex gap-2">
-          <button className="btn btn-primary" onClick={e => { e.stopPropagation(); onEdit && onEdit(); }}>Edit</button>
-          <button className="btn btn-danger" onClick={e => { e.stopPropagation(); onDelete && onDelete(e); }}>Delete</button>
+        <div className="flex gap-2 justify-end">
+          <button 
+            className="font-semibold text-blue-600 hover:underline focus:outline-none" 
+            onClick={e => { e.stopPropagation(); onEdit && onEdit(); }}
+          >
+            Edit
+          </button>
+          <button 
+            className="font-semibold text-red-600 hover:underline focus:outline-none" 
+            onClick={e => { e.stopPropagation(); onDelete && onDelete(e); }}
+          >
+            Delete
+          </button>
         </div>
       </div>
     )}
