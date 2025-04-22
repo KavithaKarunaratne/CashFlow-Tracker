@@ -82,7 +82,7 @@ export default function ManageTagsModal({ isOpen, onClose }) {
 
   // Delete tag
   const handleDelete = async (tagId) => {
-    if (!window.confirm("Delete this tag?")) return;
+    
     try {
       const res = await fetch(`/api/tags/${tagId}/`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete tag.");
